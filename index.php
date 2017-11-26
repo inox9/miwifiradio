@@ -6,7 +6,7 @@ require_once 'lib/Requests.php';
 Requests::register_autoloader();
 // This is required for including configs and functions. Sorry, bad code :D
 define("_KATE_MAIN", true);
-require_once(__DIR__ . 'config/config.php');
+require_once(__DIR__ . '/config/config.php');
 require_once(__DIR__ . '/include/function.php');
 // We don't want errors to block our app from displaying info
 error_reporting(1);
