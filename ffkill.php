@@ -1,4 +1,4 @@
-#!/usr/local/bin/php
+#!/usr/bin/env php
 <?php
 // This is required for including configs and functions. Sorry, bad code :D
 define("_KATE_MAIN", true);
