@@ -33,12 +33,12 @@ list($resultNum) = $db->sql_fetchrow($db->sql_query("SELECT COUNT(*) FROM radios
 $out = ['total_page' => 0, 'total_count' => 0, 'current_page' => 1, 'radios' => []];
 if ($resultNum) {
     $result = $db->sql_query("SELECT id, xid, title, description, logo, requests FROM radios WHERE title LIKE '%$query%' OR description LIKE '%$query%' ORDER BY xid ASC LIMIT $starting, 20");
-    $out['total_count'] = $resultNum;
+    $out['total_count'] = intval($resultNum);
     $out['total_page'] = ceil($resultNum / 20);
     $out['current_page'] = $curPage;
     while ($radioRow = $db->sql_fetchrow($result)) {
         $out['radios'][] = [
-            'id' => $radioRow['xid'],
+            'id' => intval($radioRow['xid']),
             'kind' => 'radio',
             'program_name' => '',
             'radio_name' => $radioRow['title'],
@@ -49,7 +49,7 @@ if ($resultNum) {
             'rate64_aac_url' => sprintf('http://%s/%s.m3u8', $domain, $radioRow['xid']),
             'rate24_ts_url' => '',
             'rate64_ts_url' => '',
-            'radio_play_count' => $radioRow['requests'],
+            'radio_play_count' => intval($radioRow['requests']),
             'cover_url_small' => sprintf('http://%s/images/radiologos/thumb/thumb_%s', $domain, $radioRow['logo']),
             'cover_url_large' => sprintf('http://%s/images/radiologos/%s', $domain, $radioRow['logo']),
             'updated_at' => 0,
