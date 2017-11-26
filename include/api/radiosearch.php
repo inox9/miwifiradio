@@ -27,21 +27,36 @@
     }
 */
 $query = urldecode($requestParams['params']['q']);
-$curPage = $requestParams['params']['page'];
+$curPage = $requestParams['params']['page'] ?: 1;
 $starting = ($curPage > 1) ? 20 * ($curPage - 1) : 0;
 list($resultNum) = $db->sql_fetchrow($db->sql_query("SELECT COUNT(*) FROM radios WHERE title LIKE '%$query%' OR description LIKE '%$query%'"));
-if($resultNum == 0) {
-    echo '{"total_page":0,"total_count":0,"current_page":1,"radios":[]}';
-    exit;
-} else {
-    $result = $db->sql_query("SELECT id, xid, title, description, logo FROM radios WHERE title LIKE '%$query%' OR description LIKE '%$query%' ORDER BY xid ASC LIMIT $starting, 20");
-    $radios = [];
-    while($radioRow = $db->sql_fetchrow($result)) {
-        $radios[] = '{"id":'.$radioRow['xid'].',"kind":"radio","program_name":"","radio_name":"'.addslashes($radioRow['title']).'","radio_desc":"'.addslashes($radioRow['description']).'","schedule_id":0,"support_bitrates":[64],"rate24_aac_url":"","rate64_aac_url":"http://'.$domain.'/'.$radioRow['xid'].'.m3u8","rate24_ts_url":"","rate64_ts_url":"","radio_play_count":1,"cover_url_small":"http://'.$domain.'/images/radiologos/thumb/thumb_'.$radioRow['logo'].'","cover_url_large":"http://'.$domain.'/'.$radioRow['logo'].'","updated_at":0,"created_at":0}';
+$out = ['total_page' => 0, 'total_count' => 0, 'current_page' => 1, 'radios' => []];
+if ($resultNum) {
+    $result = $db->sql_query("SELECT id, xid, title, description, logo, requests FROM radios WHERE title LIKE '%$query%' OR description LIKE '%$query%' ORDER BY xid ASC LIMIT $starting, 20");
+    $out['total_count'] = $resultNum;
+    $out['total_page'] = ceil($resultNum / 20);
+    $out['current_page'] = $curPage;
+    while ($radioRow = $db->sql_fetchrow($result)) {
+        $out['radios'][] = [
+            'id' => $radioRow['xid'],
+            'kind' => 'radio',
+            'program_name' => '',
+            'radio_name' => $radioRow['title'],
+            'radio_desc' => $radioRow['description'],
+            'schedule_id' => 0,
+            'support_bitrates' => [64],
+            'rate24_aac_url' => '',
+            'rate64_aac_url' => sprintf('http://%s/%s.m3u8', $domain, $radioRow['xid']),
+            'rate24_ts_url' => '',
+            'rate64_ts_url' => '',
+            'radio_play_count' => $radioRow['requests'],
+            'cover_url_small' => sprintf('http://%s/images/radiologos/thumb/thumb_%s', $domain, $radioRow['logo']),
+            'cover_url_large' => sprintf('http://%s/images/radiologos/%s', $domain, $radioRow['logo']),
+            'updated_at' => 0,
+            'created_at' => 0
+        ];
     }
-    $response = '{"total_page":'.ceil($resultNum/20).',"total_count":'.$resultNum.',"current_page":'.$curPage.',"radios":['.implode(",", $radios).']}';
-    $response = str_replace("\n", "", $response);
-    $response = str_replace("\r", "", $response);
-    echo $response;
-    exit;
 }
+
+header('Content-type: application/json');
+echo json_encode($out);

@@ -130,6 +130,21 @@ function date_field($timestamp, $field_name)
     return $content;
 }
 
+function clear_dir($dir)
+{
+    if (!file_exists($dir)) {
+        return false;
+    }
+
+    $di = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
+    $ri = new RecursiveIteratorIterator($di, RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ($ri as $file) {
+        $file->isDir() ?  rmdir($file) : unlink($file);
+    }
+    
+    return true;
+}
+
 //Мультибайтовая обрезка строки
 function mb_trim($string, $charlist = '\\\\s', $ltrim = true, $rtrim = true)
 {
@@ -292,16 +307,7 @@ function upload_file($fieldname, $dirtoplace, $filename = "", $thumbdir = "", $t
 function rrmdir($dir)
 {
     if (is_dir($dir)) {
-        $objects = scandir($dir);
-        foreach ($objects as $object) {
-            if ($object != "." && $object != "..") {
-                if (is_dir($dir . "/" . $object))
-                    rrmdir($dir . "/" . $object);
-                else
-                    unlink($dir . "/" . $object);
-            }
-        }
-        rmdir($dir);
+        exec('rm -rf ' . $dir);
     }
 }
 

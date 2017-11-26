@@ -10,6 +10,6 @@ error_reporting(1);
 
 $m3uFname = substr($_SERVER['QUERY_STRING'], 4);
 $xid = intval($m3uFname);
-$pid=ffstart($xid);
+$pid = ffstart($xid);
 $db->sql_query("UPDATE radios SET requests=requests+1,lastrequest=now() WHERE xid='$xid'");
-output_file($global_path . 'uploads/playing/' . $xid . '/pl.m3u8', 'pl.m3u8');
+output_file($uploads_path . $xid . '/pl.m3u8', 'pl.m3u8');
